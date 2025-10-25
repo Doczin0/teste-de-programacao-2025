@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Platform, SafeAreaView, ScrollView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DateTimePickerModal from "../components/SafeDateTimePickerModal";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { format, parseISO } from "date-fns";
 import TextField from "../components/TextField";

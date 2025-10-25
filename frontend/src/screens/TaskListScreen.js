@@ -13,7 +13,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DateTimePickerModal from "../components/SafeDateTimePickerModal";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { Audio } from "expo-av";
 import { differenceInDays, format, parseISO } from "date-fns";
