@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import api, { subscribeUnauthorized } from "../api/client";
+import api, { clearAuthTokens, getAuthTokens, setAuthTokens, subscribeUnauthorized } from "../api/client";
 import { queryClient } from "../lib/queryClient";
 
 export const AuthContext = createContext({
@@ -40,6 +40,12 @@ export const AuthProvider = ({ children }) => {
   const [initializing, setInitializing] = useState(true);
 
   const loadProfile = useCallback(async () => {
+    const { accessToken } = getAuthTokens();
+    if (!accessToken) {
+      setUser(null);
+      setInitializing(false);
+      return;
+    }
     try {
       const { data } = await api.get("auth/me/");
       setUser(data);
@@ -52,6 +58,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = subscribeUnauthorized(() => {
+      clearAuthTokens();
       setUser(null);
       queryClient.clear();
     });
@@ -61,10 +68,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async ({ identifier, password }) => {
     try {
-      await api.post("auth/token/", { identifier, password });
+      const { data } = await api.post("auth/token/", { identifier, password });
+      if (!data?.access || !data?.refresh) {
+        throw new Error("Resposta de login incompleta.");
+      }
+      setAuthTokens({
+        accessToken: data.access,
+        refreshToken: data.refresh
+      });
       await loadProfile();
     } catch (error) {
-      throw new Error(extractErrorMessage(error, "Não foi possível autenticar."));
+      throw new Error(extractErrorMessage(error, "Nao foi possivel autenticar."));
     }
   }, [loadProfile]);
 
@@ -72,8 +86,9 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post("auth/logout/");
     } catch (error) {
-      console.warn("Logout falhou, limpando sessão local.", error);
+      console.warn("Logout falhou, limpando sessao local.", error);
     } finally {
+      clearAuthTokens();
       setUser(null);
       queryClient.clear();
     }

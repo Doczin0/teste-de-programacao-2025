@@ -10,7 +10,7 @@ from .views import (
     ConfirmPasswordResetView,
     HealthView,
 )
-from .auth_cookies import CookieTokenObtainPairView, CookieTokenRefreshView, LogoutView, MeView
+from .auth_tokens import TokenObtainPairView, TokenRefreshView, LogoutView, MeView
 
 router = DefaultRouter()
 router.register(r"tasks", TaskViewSet, basename="task")
@@ -21,9 +21,9 @@ urlpatterns = [
     path("auth/verify/", VerifyEmailView.as_view(), name="verify-email"),
     path("auth/resend/", ResendCodeView.as_view(), name="resend-code"),
     path("auth/resolve-username/", ResolveUsernameView.as_view(), name="resolve-username"),
-    path("auth/token/", CookieTokenObtainPairView.as_view(), name="cookie_token_obtain_pair"),
-    path("auth/token/refresh/", CookieTokenRefreshView.as_view(), name="cookie_token_refresh"),
-    path("auth/logout/", LogoutView.as_view(), name="cookie_logout"),
+    path("auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("auth/me/", MeView.as_view(), name="me"),
     path("auth/password/reset/", RequestPasswordResetView.as_view(), name="password-reset"),
     path("auth/password/confirm/", ConfirmPasswordResetView.as_view(), name="password-confirm"),

@@ -1,6 +1,7 @@
 import axios from "axios";
 import Constants from "expo-constants";
 import { NativeModules, Platform } from "react-native";
+import { clearStoredTokens, getStoredTokens, persistTokens } from "./tokenStorage";
 
 const API_PORT = Number(process.env.EXPO_PUBLIC_API_PORT || "8000");
 const API_ROOT_PATH = "/api";
@@ -144,11 +145,76 @@ if (!envBaseUrl && __DEV__ && Platform.OS !== "web") {
 
 const api = axios.create({
   baseURL: `${baseMeta.resolvedBaseUrl}/`,
-  withCredentials: true,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json"
   }
+});
+
+const applyAuthorizationHeader = (token) => {
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
+  }
+};
+
+let authTokens = {
+  accessToken: null,
+  refreshToken: null
+};
+
+const hydrateStoredTokens = () => {
+  const stored = getStoredTokens();
+  if (!stored) {
+    authTokens = { accessToken: null, refreshToken: null };
+    applyAuthorizationHeader(null);
+    return;
+  }
+  authTokens = {
+    accessToken: stored.accessToken || null,
+    refreshToken: stored.refreshToken || null
+  };
+  applyAuthorizationHeader(authTokens.accessToken);
+};
+
+export const getAuthTokens = () => ({ ...authTokens });
+
+export const setAuthTokens = ({ accessToken, refreshToken }) => {
+  authTokens = {
+    accessToken:
+      typeof accessToken === "undefined" ? authTokens.accessToken : accessToken || null,
+    refreshToken:
+      typeof refreshToken === "undefined" ? authTokens.refreshToken : refreshToken || null
+  };
+  applyAuthorizationHeader(authTokens.accessToken);
+  if (authTokens.accessToken || authTokens.refreshToken) {
+    persistTokens(authTokens);
+  } else {
+    clearStoredTokens();
+  }
+};
+
+export const clearAuthTokens = () => {
+  authTokens = { accessToken: null, refreshToken: null };
+  applyAuthorizationHeader(null);
+  clearStoredTokens();
+};
+
+hydrateStoredTokens();
+
+api.interceptors.request.use((config) => {
+  if (authTokens.accessToken) {
+    if (config.headers?.set) {
+      config.headers.set("Authorization", `Bearer ${authTokens.accessToken}`);
+    } else {
+      config.headers = {
+        ...(config.headers || {}),
+        Authorization: `Bearer ${authTokens.accessToken}`
+      };
+    }
+  }
+  return config;
 });
 
 const setApiBaseUrl = (nextBaseUrl, source = "manual") => {
@@ -253,6 +319,7 @@ const onRefreshFailed = (error) => {
 };
 
 const notifyUnauthorized = () => {
+  clearAuthTokens();
   unauthorizedListeners.forEach((listener) => {
     try {
       listener();
@@ -322,7 +389,18 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      await api.post("auth/token/refresh/");
+      const currentRefresh = authTokens.refreshToken;
+      if (!currentRefresh) {
+        throw new Error("Refresh token ausente.");
+      }
+      const { data } = await api.post("auth/token/refresh/", { refresh: currentRefresh });
+      if (!data?.access) {
+        throw new Error("Resposta sem access token.");
+      }
+      setAuthTokens({
+        accessToken: data.access,
+        refreshToken: data.refresh ?? currentRefresh
+      });
       onRefreshed();
       return api(originalRequest);
     } catch (refreshError) {
