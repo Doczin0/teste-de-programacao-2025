@@ -64,7 +64,7 @@ const LoginScreen = ({ navigation }) => {
         label="Usuário ou e-mail"
         value={identifier}
         onChangeText={setIdentifier}
-        placeholder="usuario ou email"
+        placeholder="ex: voce@email.com"
         autoCapitalize="none"
       />
 
@@ -72,7 +72,7 @@ const LoginScreen = ({ navigation }) => {
         label="Senha"
         value={password}
         onChangeText={setPassword}
-        placeholder="Sua senha ultra segura"
+        placeholder="********"
         secureTextEntry
       />
 

@@ -197,7 +197,7 @@ const TaskFormScreen = ({ navigation, route }) => {
             onChangeText={handleTitleChange}
             placeholder="Resumo da tarefa"
           />
-          <Text style={[styles.helperText, { color: theme.palette.textMuted }]}>
+          <Text style={[styles.helperText,  { color: theme.palette.textMuted }]}>
             {title.length}/20 caracteres utilizados.
           </Text>
 
@@ -205,7 +205,7 @@ const TaskFormScreen = ({ navigation, route }) => {
             label="Descrição"
             value={description}
             onChangeText={setDescription}
-            placeholder="Detalhes, links ou critérios de aceite"
+            placeholder="Detalhes, links ou critérios"
             multiline
             numberOfLines={5}
           />
@@ -395,7 +395,10 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 12,
-    marginTop: 8
+    marginTop: -8,
+    marginBottom: 20,
+    alignSelf: 'start',
+    marginLeft: 5,
   },
   checklistContainer: {
     borderRadius: 18,

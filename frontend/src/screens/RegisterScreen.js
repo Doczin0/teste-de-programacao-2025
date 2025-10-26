@@ -100,7 +100,7 @@ const RegisterScreen = ({ navigation }) => {
         value={form.password}
         onChangeText={updateField("password")}
         secureTextEntry
-        placeholder="Senha com símbolos, números e letras"
+        placeholder="senha forte"
       />
 
       <PasswordStrength password={form.password} />
@@ -110,7 +110,7 @@ const RegisterScreen = ({ navigation }) => {
         value={form.confirmPassword}
         onChangeText={updateField("confirmPassword")}
         secureTextEntry
-        placeholder="Repita a senha"
+        placeholder="repita a senha"
         error={passwordMismatch ? "As senhas precisam ser idênticas." : undefined}
       />
 
