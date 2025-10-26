@@ -88,8 +88,9 @@ Para reproduzir exatamente como executo aqui em casa, sigo estes requisitos mín
      # Linux/macOS
      export EXPO_PUBLIC_API_URL=http://192.168.1.129:8000/api
      ```
-
+   - Se houver problemas ao tentar autenticar ou criar conta, possívelmente é a conexão com API. Verificar se API_URL está correta.
    - Para builds de produção/web sempre defino a variável antes de rodar `npm run build` (ou `npx expo export`).
+
 
 3. **Start do Metro/Expo**
 
